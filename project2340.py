@@ -224,24 +224,100 @@ class project2340:
 
             if count2 == 6:
                 break
-                        
-   
+  
 
 
-    def viewData (self):
+    def viewData(self):
+        
         self.viewDataView = Toplevel()
         self.viewDataView.title("List of recent rat sighting")
         
         self.frame1 = Frame(self.viewDataView)
         self.frame1.pack(side=TOP)
         
-        slices = [20475, 34199, 26250,14574, 4867]
-        activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+        yearOptions = ["2017", "2016",
+                           "2015", "2014", "2013", "2012", "2011", "2010"]
+        self.yearVar = StringVar(root)
+        self.yearType = OptionMenu(self.frame1, self.yearVar, *yearOptions)
+        self.yearType.grid(row=2,column=1)
 
-        plt.pie(slices,labels=activities,startangle=90)
-        plt.title("Rats by Borough")
-        plt.show()
+        self.yearLabel = Label(self.frame1, text = "Select the year for which you would like to see the rat sightings by Borough:")
+        self.yearLabel.grid(row = 1, column = 0, sticky = E)
         
+        self.submit = Button(self.frame1, text= "Submit", command = self.dataCheck)
+        self.submit.grid(row = 3, column = 1)
+
+       
+
+        
+        
+    def dataCheck (self):
+
+        
+        if self.yearVar.get() == "2017":
+            slices = [2560, 5019, 3043,1963, 563]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities,startangle=90, autopct='%1.1f%%')
+            plt.title("Rats by Borough")
+            plt.show()
+
+        if self.yearVar.get() == "2016":
+            slices = [3497, 5979, 4610,2410, 734]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities, startangle=90, autopct='%1.1f%%')
+            plt.title("Rats by Borough")
+            plt.show()
+
+        if self.yearVar.get() == "2015":
+            slices = [3189, 5263, 4123,2103, 594]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities,startangle=90, autopct='%1.1f%%')
+            plt.title("Rats by Borough")
+            plt.show()
+
+        if self.yearVar.get() == "2014":
+            slices = [2743, 3968, 3541,1748, 617]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities,startangle=90, autopct='%1.1f%%')
+            plt.title("Rats by Borough")
+            plt.show()
+            
+        if self.yearVar.get() == "2013":
+            slices = [2120, 3300, 3018,1660, 641]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities,startangle=90, autopct='%1.1f%%')
+            plt.title("Rats by Borough")
+            plt.show()
+
+        if self.yearVar.get() == "2012":
+            slices = [2125, 3600, 2857,1522, 538]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities,startangle=90, autopct='%1.1f%%')
+            plt.title("Rats by Borough")
+            plt.show()
+
+        if self.yearVar.get() == "2011":
+            slices = [2174, 3671, 2461,1600, 548]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities,startangle=90)
+            plt.title("Rats by Borough")
+            plt.show()
+
+        if self.yearVar.get() == "2010":
+            slices = [2067, 3399, 2867,1569, 632]
+            activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
+
+            plt.pie(slices,labels=activities,startangle=90)
+            plt.title("Rats by Borough")
+            plt.show()
+            
     def viewMap (self):
         print "some stuff will happen"
 
