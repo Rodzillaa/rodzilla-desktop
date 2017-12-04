@@ -1,6 +1,6 @@
 import pymysql
-from tkinter import messagebox
-from tkinter import *
+from Tkinter import messagebox
+from Tkinter import *
 import base64
 import os
 import requests
