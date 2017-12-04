@@ -7,7 +7,7 @@ import random
 import datetime
 from matplotlib import pyplot as plt
 import numpy as np
-  
+import tkMessageBox
 
 
 class project2340:
@@ -346,8 +346,14 @@ class project2340:
                                      data=loginPayload)
         print (loginRequest.text)
 
-        self.root.withdraw()
-        self.mainPage()
+        if loginRequest.text.find("1") == -1:
+            #python 3 - from tkinter import messagebox
+            #python 3 -  messagebox.showinfo("Error", "Incorrect Login")
+           tkMessageBox.showinfo("Error", "Incorrect Login")
+
+        else: 
+            self.root.withdraw()
+            self.mainPage()
 
     def submitReportCheck(self):
         print "rat submitted"
