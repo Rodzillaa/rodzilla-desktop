@@ -8,6 +8,10 @@ import datetime
 from matplotlib import pyplot as plt
 import numpy as np
 import tkMessageBox
+import json
+import gmplot
+import webbrowser
+import heapq
 
 
 class project2340:
@@ -306,7 +310,7 @@ class project2340:
             slices = [2174, 3671, 2461,1600, 548]
             activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
 
-            plt.pie(slices,labels=activities,startangle=90)
+            plt.pie(slices,labels=activities,startangle=90, autopct='%1.1f%%')
             plt.title("Rats by Borough")
             plt.show()
 
@@ -314,13 +318,39 @@ class project2340:
             slices = [2067, 3399, 2867,1569, 632]
             activities = ["Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island"]
 
-            plt.pie(slices,labels=activities,startangle=90)
+            plt.pie(slices,labels=activities,startangle=90, autopct='%1.1f%%')
             plt.title("Rats by Borough")
             plt.show()
             
     def viewMap (self):
-        print "some stuff will happen"
+        r = requests.get('http://ec2-54-174-96-216.compute-1.amazonaws.com:9000/showRecords')
+        rtext = r.text
+        rawdata = json.loads(rtext)
+        
+        latitudes = []
+        longitudes = []
+        for k, v in rawdata.items():
+            if type(v['latitude']) == float:
+                latitudes.append(v['latitude'])
+            else:
+                try:
+                    latitudes.append(float(v['latitude']))
+                except:
+                    pass
+            if type(v['longitude']) == float:
+                longitudes.append(v['longitude'])
+            else:
+                try:
+                    longitudes.append(float(v['longitude']))
+                except:
+                    pass
 
+
+        gmap = gmplot.GoogleMapPlotter.from_geocode("New York")
+        gmap.heatmap(latitudes, longitudes, threshold=20, radius=20)
+        
+        gmap.draw("mymap.html")
+        webbrowser.open_new_tab('mymap.html')
     def logout (self):
         print "log out"
         self.mainPageView.withdraw()
@@ -346,7 +376,7 @@ class project2340:
                                      data=loginPayload)
         print (loginRequest.text)
 
-        if loginRequest.text.find("1") == -1:
+        if loginRequest.text.find("0") == -1:
             #python 3 - from tkinter import messagebox
             #python 3 -  messagebox.showinfo("Error", "Incorrect Login")
            tkMessageBox.showinfo("Error", "Incorrect Login")
