@@ -11,7 +11,9 @@ import tkMessageBox
 import json
 import gmplot
 import webbrowser
-import heapq
+from tkintertable.Tables import TableCanvas
+from tkintertable.TableModels import TableModel
+from dateutil import parser
 
 
 class project2340:
@@ -114,7 +116,7 @@ class project2340:
         #creating buttons
         self.submitButton = Button (self.frame1, text = "Submit Rat Report", command = self.submitReport)
         self.submitButton.grid(row = 1, column = 0)
-        self.listButton = Button(self.frame1, text= "List of  recent rat sightings", command = self.ratSightings)
+        self.listButton = Button(self.frame1, text= "List of Recent Rat Sightings", command = self.ratSightings)
         self.listButton.grid(row = 2, column = 0)
         self.viewGraph = Button(self.frame1, text= "View Data Graphs", command = self.viewData)
         self.viewGraph.grid(row = 3, column = 0)
@@ -180,17 +182,44 @@ class project2340:
         self.cancel.grid(row = 1, column = 2)
 
 
-        
-        
+    def ratSightings (self):
+        #call API for data
+        r = requests.get('http://ec2-54-174-96-216.compute-1.amazonaws.com:9000/showRecords')
+        rtext = r.text
+        rawdata = json.loads(rtext)
 
-    def ratSightings (self):     
-        
+        #create table & model
         self.ratSightingView = Toplevel()
-        self.ratSightingView.title("List of recent rat sighting")
+        self.ratSightingView.title("List of recent rat sightings")
         
-        self.frame1 = Frame(self.ratSightingView)
-        self.frame1.pack(side=TOP)
+        self.rattable = Frame(self.ratSightingView)
+        self.rattable.pack()
         
+        model = TableModel()
+        model.importDict(rawdata)
+        
+        #convert date column to datetime data type
+        for x in range(len(rawdata)):
+            datestr = model.getValueAt(x, 6)
+            try:                
+                date = datetime.datetime.strptime(datestr, '%m/%d/%Y %I:%M:%S %p')
+                model.setValueAt(date.strftime('%Y/%m/%d %I:%M:%S %p'), x, 6)
+            except:
+                try:
+                    dt = parser.parse(datestr)
+                    model.setValueAt(date.strftime('%Y/%m/%d %I:%M:%S %p'), x, 6)
+                except:
+                    pass
+                pass
+
+        #get data into table
+        table = TableCanvas(self.rattable, model=model)
+        table.createTableFrame()
+
+        #sort by date
+        table.sortTable(columnName='date')
+
+        '''
         sightingRequest = requests.get('http://ec2-54-174-96-216.compute-1.amazonaws.com:9000/showRecords')
         data = sightingRequest.text
         dataList = data.split("},")
@@ -228,7 +257,7 @@ class project2340:
 
             if count2 == 6:
                 break
-  
+        '''
 
 
     def viewData(self):
@@ -351,6 +380,8 @@ class project2340:
         
         gmap.draw("mymap.html")
         webbrowser.open_new_tab('mymap.html')
+        
+        
     def logout (self):
         print "log out"
         self.mainPageView.withdraw()
@@ -363,35 +394,41 @@ class project2340:
                    "password":self.passwdEntry2.get(), "isAdmin": registerVar.get()}
         registerRequest = requests.post('http://ec2-54-174-96-216.compute-1.amazonaws.com:9000/addUser',
                                         data=registerPayload)
-        print (registerRequest.text)
-        
-        self.root.deiconify()
-  
+        requestJSON = registerRequest.json()
 
+        if requestJSON['status'] == 1:
+            self.register.withdraw()
+            self.root.deiconify()
+        else:
+            tkMessageBox.showerror("Registration Error", "Username field cannot be empty. No duplicate usernames.")
 
     def loginCheck(self):
         #requesting API
         loginPayload = {"username": self.userEntry.get(), "password":self.passwdEntry.get()}
         loginRequest = requests.post('http://ec2-54-174-96-216.compute-1.amazonaws.com:9000/checkUser',
                                      data=loginPayload)
-        print (loginRequest.text)
+        requestJSON = loginRequest.json()
+        #print(requestJSON)
 
-        if loginRequest.text.find("0") == -1:
-            #python 3 - from tkinter import messagebox
-            #python 3 -  messagebox.showinfo("Error", "Incorrect Login")
-           tkMessageBox.showinfo("Error", "Incorrect Login")
-
-        else: 
+        if requestJSON['status'] == 0:
             self.root.withdraw()
             self.mainPage()
+        else:
+            #python 3 - from tkinter import messagebox
+            #python 3 -  messagebox.showinfo("Error", "Incorrect Login")
+            tkMessageBox.showerror("Error", "Incorrect Login")
+
 
     def submitReportCheck(self):
-        print "rat submitted"
         rand = random.randint(1111,9999)
 
+        #find latitude & longitude using current IP address
         d = datetime.datetime.now().strftime("%m/%d/%y %I:%M%p")
-        lat = 40.718
-        lon = 70.986
+        send_url = 'http://freegeoip.net/json'
+        r = requests.get(send_url)
+        j = json.loads(r.text)
+        lat = j['latitude']
+        lon = j['longitude']
 
         submitPayload = {"key":rand, "date":d, "location_type": self.locationVar.get(),
                         "zip":self.zipcode.get(), "address": self.streetName.get(),
@@ -399,14 +436,20 @@ class project2340:
                         "latitude": lat, "logitude":lon}
         submitRequest = requests.post('http://ec2-54-174-96-216.compute-1.amazonaws.com:9000/addRecord',
                                      data=submitPayload)
+        requestJSON = submitRequest.json()
+        
+        if requestJSON['status'] == 'done':
+            self.submitReportView.withdraw()
+            self.mainPageView.deiconify()
+            #print "rat submitted"
+        else:
+            tkMessageBox.showerror("Error", "Invalid information for report")
 
-        self.submitReportView.withdraw()
-        self.mainPage()
 
     def cancel(self):
         
         self.submitReportView.withdraw()
-        self.mainPage()
+        self.mainPageView.deiconify()
 
         
     
